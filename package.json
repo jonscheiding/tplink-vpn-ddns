@@ -1,0 +1,9 @@
+{
+  "name": "tplink-ddns",
+  "version": "1.0.0",
+  "description": "Dynamic DNS updater that can use the \"primary\" IP of a TP-Link router that is connected through VPN",
+  "main": "index.js",
+  "repository": "git@github.com:jonscheiding/tplink-vpn-ddns.git",
+  "author": "Jon Scheiding <jonscheiding@gmail.com>",
+  "license": "MIT"
+}
