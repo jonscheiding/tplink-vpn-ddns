@@ -1,6 +1,6 @@
 import { test } from 'ava';
 
-import { TPLinkRouter, RouterMethod, DEFAULT_URL } from '.';
+import { TPLinkRouter, RouterMethod, DEFAULT_URL } from '..';
 
 const router = new TPLinkRouter(DEFAULT_URL);
 

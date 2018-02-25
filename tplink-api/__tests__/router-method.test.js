@@ -1,8 +1,8 @@
 import { test } from 'ava';
 const nock = require('nock');
 
-import { TPLinkRouter, Authentication } from './tplink-router';
-import { RouterMethod } from './router-method';
+import { TPLinkRouter, Authentication } from '../tplink-router';
+import { RouterMethod } from '../router-method';
 
 const method = new RouterMethod('/testpath', 'testform', { constructorParam: 'constructorParam' });
 const router = new TPLinkRouter('http://router');
