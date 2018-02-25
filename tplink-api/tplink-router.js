@@ -10,4 +10,8 @@ export class TPLinkRouter {
     this.routerUrl = routerUrl;
     this.authentication = authentication;
   }
+
+  execute(method) {
+    return method.execute(this);
+  }
 }
