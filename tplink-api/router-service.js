@@ -1,5 +1,4 @@
 import request from 'request-promise';
-import setCookie from 'set-cookie-parser';
 import { URL } from 'url';
 
 export const ROUTER_URL_DEFAULT = 'http://tplinkwifi.net';
@@ -10,10 +9,10 @@ export class RouterService {
     this.request = request;
   }
 
-  parseCookies(response) {
-    const cookies = {};
-    for(let cookie of setCookie.parse(response.headers['set-cookie'])) {
-      cookies[cookie.name] = cookie.value;
+  readCookies(jar) {
+    var cookies = {};
+    for(let cookie of jar.getCookies(this.routerUrl)) {
+      cookies[cookie.key] = cookie.value;
     }
     return cookies;
   }
@@ -22,25 +21,23 @@ export class RouterService {
     const { stok, sysauth } = authentication || {};
     const url = new URL(`/cgi-bin/luci/;stok=${stok || ''}${call.path}?form=${call.form}`, this.routerUrl);
 
-    const headers = {};
-    if(sysauth) {
-      headers['Cookie'] = `sysauth=${sysauth}`;
-    }
-
     const cookieJar = request.jar();
+    if(sysauth) {
+      cookieJar.setCookie(`sysauth=${sysauth}`, this.routerUrl);
+    }
 
     return this
       .request({
         url: url.toString(),
-        headers,
         method: 'POST',
         form: { ...call.parameters, ...parameters },
         resolveWithFullResponse: true,
-        jar: cookieJar
+        jar: cookieJar,
+        proxy: 'http://localhost:5555'
       })
       .then(r => ({
         ...JSON.parse(r.body),
-        cookies: this.parseCookies(r)
+        cookies: this.readCookies(cookieJar)
       }))
       .then(r => {
         if (r.success !== true) {
@@ -61,5 +58,8 @@ export class RouterCall {
 
 export const ROUTER_CALLS = {
   GET_AUTHENTICATION_KEYS: new RouterCall('/login', 'cloud_login', {operation: 'read'}),
-  LOGIN: new RouterCall('/login', 'cloud_login', {operation: 'login'})
+  LOGIN: new RouterCall('/login', 'cloud_login', {operation: 'login'}),
+  GET_NETWORK_STATUS: new RouterCall('/admin/network', 'wan_ipv4_status', {operation: 'read'}),
+  GET_NETWORK_DETAILS_DHCP: new RouterCall('/admin/network', 'wan_ipv4_dynamic', {operation: 'read'}),
+  GET_NETWORK_DETAILS_L2TP: new RouterCall('/admin/network', 'wan_ipv4_l2tp', {operation: 'read'})
 };

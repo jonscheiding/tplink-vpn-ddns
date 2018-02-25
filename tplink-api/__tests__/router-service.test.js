@@ -7,10 +7,27 @@ import { RouterService } from '../router-service';
 const call = { path: '/testpath', form: 'testform' };
 const routerUrl = 'http://router';
 
-function spyRequest(body = {}, headers = {}) {
-  body = JSON.stringify({ success: true, ...body });
-  return sinon.spy(() => Promise.resolve({body, headers}));
+function spyRequest(responseBody = {}, responseCookies = {}) {
+  responseBody = JSON.stringify({ success: true, ...responseBody });
+  return sinon.spy(r => {
+    if(r.jar) {
+      for(let key of Object.keys(responseCookies)) {
+        r.jar.setCookie(`${key}=${responseCookies[key]}`, routerUrl);
+      }
+    }
+    return Promise.resolve({body: responseBody});
+  });
 }
+
+const containsCookie = (key, value) => sinon.match(jar => {
+  const cookies = jar.getCookies(routerUrl);
+  for(let cookie of cookies) {
+    if(cookie.key === key && cookie.value === value) {
+      return true;
+    }
+  }
+  return false;
+});
 
 test('makes request with correct url', async t => {
   const requestSpy = spyRequest();
@@ -35,8 +52,7 @@ test('makes request with authentication, when provided', async t => {
 
   sinon.assert.calledWith(requestSpy, 
     sinon.match.has('url', 'http://router/cgi-bin/luci/;stok=12345/testpath?form=testform')
-      .and(sinon.match.has('headers', 
-        sinon.match.has('Cookie', 'sysauth=67890')))
+      .and(sinon.match.has('jar', containsCookie('sysauth', '67890')))
   );
 
   t.pass();
@@ -81,7 +97,7 @@ test('returns body provided in response', async t => {
 });
 
 test('returns cookies provided in response', async t => {
-  const requestSpy = spyRequest({}, {'set-cookie': 'testCookie=testCookieValue'});
+  const requestSpy = spyRequest({}, { testCookie: 'testCookieValue' });
   const service = new RouterService(routerUrl);
   service.request = requestSpy;
 
