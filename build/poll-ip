@@ -14,14 +14,13 @@ while : ; do
   if [ ! "$IPADDRESS" == "$IPADDRESS_PREVIOUS" ]; then
     echo "IP address has changed from '$IPADDRESS_PREVIOUS' to '$IPADDRESS'."
     
-    OUTPUT=$(curl -s -u $ZONEEDIT_USERNAME:$ZONEEDIT_PASSWORD "https://dynamic.zoneedit.com/auth/dynamic.html?host=brewery.jonscheiding.com&dnsto=$IPADDRESS")
-    echo $OUTPUT
-
-    if [[ ! "$OUTPUT" == *"ERROR"* ]]; then 
+    $(dirname "$0")/update-ip $IPADDRESS
+    
+    if [ $? -eq 0 ]; then 
       echo "IP address was updated successfully."
       >$TEMP_FILE echo $IPADDRESS
     fi
   fi
 
-  sleep $UPDATE_INTERVAL
+  sleep $SLEEP_INTERVAL
 done

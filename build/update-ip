@@ -1,0 +1,10 @@
+#!/bin/bash
+
+IPADDRESS=$1
+
+OUTPUT=$(curl -s -u $ZONEEDIT_USERNAME:$ZONEEDIT_PASSWORD "https://dynamic.zoneedit.com/auth/dynamic.html?host=brewery.jonscheiding.com&dnsto=$IPADDRESS")
+echo $OUTPUT
+
+if [[ "$OUTPUT" == *"ERROR"* ]]; then 
+  exit 1
+fi
