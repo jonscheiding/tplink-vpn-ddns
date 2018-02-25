@@ -5,7 +5,7 @@ import {} from 'dotenv/config';
 import { RouterService } from '../src/tplink-api/router-service';
 
 const call = { path: '/testpath', form: 'testform' };
-const routerUrl = 'http://router';
+const routerUrl = 'http://router/cgi-bin/luci/';
 
 function spyRequest(responseBody = {}, responseCookies = {}) {
   responseBody = JSON.stringify({ success: true, ...responseBody });

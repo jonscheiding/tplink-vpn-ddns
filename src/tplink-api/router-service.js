@@ -5,7 +5,7 @@ export const ROUTER_URL_DEFAULT = 'http://tplinkwifi.net';
 
 export class RouterService {
   constructor(routerUrl = ROUTER_URL_DEFAULT) {
-    this.routerUrl = routerUrl;
+    this.routerUrl = new URL('/cgi-bin/luci/', routerUrl);
     this.request = request;
   }
 
@@ -19,7 +19,7 @@ export class RouterService {
 
   execute(call, parameters, authentication) {
     const { stok, sysauth } = authentication || {};
-    const url = new URL(`/cgi-bin/luci/;stok=${stok || ''}${call.path}?form=${call.form}`, this.routerUrl);
+    const url = new URL(`;stok=${stok || ''}${call.path}?form=${call.form}`, this.routerUrl);
 
     const cookieJar = request.jar();
     if(sysauth) {
@@ -32,8 +32,7 @@ export class RouterService {
         method: 'POST',
         form: { ...call.parameters, ...parameters },
         resolveWithFullResponse: true,
-        jar: cookieJar,
-        proxy: 'http://localhost:5555'
+        jar: cookieJar
       })
       .then(r => ({
         ...JSON.parse(r.body),
