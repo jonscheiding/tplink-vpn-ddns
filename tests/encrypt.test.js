@@ -1,6 +1,6 @@
 import { test } from 'ava';
 
-import { encrypt } from '../encrypt';
+import { encrypt } from '../src/tplink-api/encrypt';
 
 const plainText = 'some_password';
 

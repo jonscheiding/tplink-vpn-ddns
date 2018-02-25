@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import {} from 'dotenv/config';
 
-import { RouterService } from '../router-service';
+import { RouterService } from '../src/tplink-api/router-service';
 
 const call = { path: '/testpath', form: 'testform' };
 const routerUrl = 'http://router';

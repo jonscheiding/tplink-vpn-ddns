@@ -1,8 +1,8 @@
 import { test as testBase } from 'ava';
 import { } from 'dotenv/config';
 
-import { RouterService } from '../router-service';
-import { TPLinkRouter } from '../tplink-router';
+import { RouterService } from '../src/tplink-api/router-service';
+import { TPLinkRouter } from '../src/tplink-api/tplink-router';
 
 let test = testBase;
 if(!process.env.ROUTER_URL) {
