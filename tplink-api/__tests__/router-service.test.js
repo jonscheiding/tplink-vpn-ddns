@@ -7,9 +7,9 @@ import { RouterService } from '../router-service';
 const call = { path: '/testpath', form: 'testform' };
 const routerUrl = 'http://router';
 
-function spyRequest(response = {}) {
-  response = { success: true, ...response };
-  return sinon.spy(() => Promise.resolve(JSON.stringify(response)));
+function spyRequest(body = {}, headers = {}) {
+  body = JSON.stringify({ success: true, ...body });
+  return sinon.spy(() => Promise.resolve({body, headers}));
 }
 
 test('makes request with correct url', async t => {
@@ -78,6 +78,16 @@ test('returns body provided in response', async t => {
   const response = await service.execute(call, {callParam: 'callParamValue'});
 
   t.deepEqual(response.data, { testData: 'testValue' });
+});
+
+test('returns cookies provided in response', async t => {
+  const requestSpy = spyRequest({}, {'set-cookie': 'testCookie=testCookieValue'});
+  const service = new RouterService(routerUrl);
+  service.request = requestSpy;
+
+  const response = await service.execute(call);
+
+  t.deepEqual(response.cookies, {testCookie: 'testCookieValue'});
 });
 
 test('execute parameters override call parameters', async t => {

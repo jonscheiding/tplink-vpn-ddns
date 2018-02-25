@@ -1,4 +1,5 @@
 import request from 'request-promise';
+import setCookie from 'set-cookie-parser';
 import { URL } from 'url';
 
 export const ROUTER_URL_DEFAULT = 'http://tplinkwifi.net';
@@ -7,6 +8,14 @@ export class RouterService {
   constructor(routerUrl = ROUTER_URL_DEFAULT) {
     this.routerUrl = routerUrl;
     this.request = request;
+  }
+
+  parseCookies(response) {
+    const cookies = {};
+    for(let cookie of setCookie.parse(response.headers['set-cookie'])) {
+      cookies[cookie.name] = cookie.value;
+    }
+    return cookies;
   }
 
   execute(call, parameters, authentication) {
@@ -18,14 +27,21 @@ export class RouterService {
       headers['Cookie'] = `sysauth=${sysauth}`;
     }
 
+    const cookieJar = request.jar();
+
     return this
       .request({
         url: url.toString(),
         headers,
         method: 'POST',
-        form: { ...call.parameters, ...parameters }
+        form: { ...call.parameters, ...parameters },
+        resolveWithFullResponse: true,
+        jar: cookieJar
       })
-      .then(JSON.parse)
+      .then(r => ({
+        ...JSON.parse(r.body),
+        cookies: this.parseCookies(r)
+      }))
       .then(r => {
         if (r.success !== true) {
           return Promise.reject(r);
