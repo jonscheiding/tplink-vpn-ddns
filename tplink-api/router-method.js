@@ -12,11 +12,14 @@ export class RouterMethod {
     const { stok, sysauth } = router.authentication || {};
     const url = new URL(`/cgi-bin/luci/;stok=${stok || ''}${this.path}?form=${this.form}`, router.routerUrl);
 
+    const headers = {};
+    if(sysauth) {
+      headers['Cookie'] = `sysauth=${sysauth}`;
+    }
+
     return {
       url,
-      headers: { 
-        'Cookie': `sysauth=${sysauth}`
-      },
+      headers,
       method: 'POST',
       form: { ...this.parameters, ...parameters }
     };

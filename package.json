@@ -19,6 +19,7 @@
     "nock": "^9.2.1"
   },
   "dependencies": {
+    "dotenv": "^5.0.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
   },
