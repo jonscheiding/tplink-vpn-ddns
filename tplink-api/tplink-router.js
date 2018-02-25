@@ -20,4 +20,41 @@ export class TPLinkRouter {
       sysauth: response.cookies.sysauth
     };
   }
+
+  async getPublicIpAddress() {
+    if(!this.authentication) {
+      return Promise.reject('Router client is not logged in; please call login() first.');
+    }
+
+    const status = await this.service.execute(ROUTER_CALLS.GET_NETWORK_STATUS, {}, this.authentication);
+    const detailsCall = this.getDetailsCall(status.data.conntype);
+
+    if(detailsCall === null) {
+      return Promise.reject(`Unknown connection type: '${status.data.conntype}'.`);
+    }
+
+    const details = await this.service.execute(detailsCall.call, {}, this.authentication);
+    const ipInfo = detailsCall.extractIpInfo(details.data);
+
+    return {
+      ...ipInfo, connectionType: status.data.conntype
+    };
+  }
+
+  getDetailsCall(connectionType) {
+    switch(connectionType) {
+      case 'dhcp': return {
+        call: ROUTER_CALLS.GET_NETWORK_DETAILS_DHCP,
+        extractIpInfo: data => ({ipAddress: data.ipaddr})
+      };
+      case 'l2tp': return {
+        call: ROUTER_CALLS.GET_NETWORK_DETAILS_L2TP,
+        extractIpInfo: data => ({
+          ipAddress: data.dyn_ip,
+          ipAddressVpn: data.inet_ip
+        })
+      };
+      default: return null;
+    }
+  }
 }
