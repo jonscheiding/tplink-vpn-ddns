@@ -1,0 +1,27 @@
+#!/bin/bash
+
+UPDATE_INTERVAL=${UPDATE_INTERVAL:=5}
+
+TEMP_FILE="$TMPDIR/ddns-ipaddress"
+
+while : ; do
+  IPADDRESS=$(yarn run -s run)
+  
+  if [ -f $TEMP_FILE ]; then
+    IPADDRESS_PREVIOUS=$(cat $TEMP_FILE)
+  fi
+
+  if [ ! "$IPADDRESS" == "$IPADDRESS_PREVIOUS" ]; then
+    echo "IP address has changed from '$IPADDRESS_PREVIOUS' to '$IPADDRESS'."
+    
+    OUTPUT=$(curl -s -u $ZONEEDIT_USERNAME:$ZONEEDIT_PASSWORD "https://dynamic.zoneedit.com/auth/dynamic.html?host=brewery.jonscheiding.com&dnsto=$IPADDRESS")
+    echo $OUTPUT
+
+    if [[ ! "$OUTPUT" == *"ERROR"* ]]; then 
+      echo "IP address was updated successfully."
+      >$TEMP_FILE echo $IPADDRESS
+    fi
+  fi
+
+  sleep $UPDATE_INTERVAL
+done
