@@ -22,5 +22,5 @@ while : ; do
     fi
   fi
 
-  sleep $SLEEP_INTERVAL
+  sleep $UPDATE_INTERVAL
 done
